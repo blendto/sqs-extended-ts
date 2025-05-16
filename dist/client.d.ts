@@ -1,4 +1,4 @@
-import { SQSClient, SendMessageCommandInput, ReceiveMessageRequest, Message } from "@aws-sdk/client-sqs";
+import { SQSClient, ReceiveMessageRequest, Message, SendMessageCommandOutput, DeleteMessageRequest, DeleteMessageCommandOutput, SendMessageRequest, ReceiveMessageCommandOutput, SendMessageBatchRequest, SendMessageBatchCommandOutput, DeleteMessageBatchRequest, DeleteMessageBatchCommandOutput, ChangeMessageVisibilityRequest, ChangeMessageVisibilityCommandOutput, ChangeMessageVisibilityBatchRequest, ChangeMessageVisibilityBatchCommandOutput, PurgeQueueRequest, PurgeQueueCommandOutput } from "@aws-sdk/client-sqs";
 import { S3Client } from "@aws-sdk/client-s3";
 import { SqsExtendedClientOptions } from "./types";
 export declare class SQSExtendedClient {
@@ -19,14 +19,14 @@ export declare class SQSExtendedClient {
     private getOriginalReceiptHandle;
     private getFromReceiptHandleByMarker;
     private deleteMessageFromS3;
-    sendMessage(params: SendMessageCommandInput): Promise<any>;
-    receiveMessage(params: ReceiveMessageRequest): Promise<any>;
+    sendMessage(params: SendMessageRequest): Promise<SendMessageCommandOutput>;
+    receiveMessage(params: ReceiveMessageRequest): Promise<ReceiveMessageCommandOutput>;
     parseMessage(message: Message): Promise<Message>;
     getMessageAtrributeNamesForReceiveMessage(initial?: ReceiveMessageRequest["MessageAttributeNames"]): string[];
-    deleteMessage(params: any): Promise<any>;
-    sendMessageBatch(params: any): Promise<any>;
-    deleteMessageBatch(params: any): Promise<any>;
-    changeMessageVisibility(params: any): Promise<any>;
-    changeMessageVisibilityBatch(params: any): Promise<any>;
-    purgeQueue(params: any): Promise<any>;
+    deleteMessage(params: DeleteMessageRequest): Promise<DeleteMessageCommandOutput>;
+    sendMessageBatch(params: SendMessageBatchRequest): Promise<SendMessageBatchCommandOutput>;
+    deleteMessageBatch(params: DeleteMessageBatchRequest): Promise<DeleteMessageBatchCommandOutput>;
+    changeMessageVisibility(params: ChangeMessageVisibilityRequest): Promise<ChangeMessageVisibilityCommandOutput>;
+    changeMessageVisibilityBatch(params: ChangeMessageVisibilityBatchRequest): Promise<ChangeMessageVisibilityBatchCommandOutput>;
+    purgeQueue(params: PurgeQueueRequest): Promise<PurgeQueueCommandOutput>;
 }
