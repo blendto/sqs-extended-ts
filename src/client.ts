@@ -10,7 +10,6 @@ import {
   DeleteMessageBatchCommand,
   ChangeMessageVisibilityBatchCommand,
   SendMessageBatchRequest,
-  SendMessageBatchCommandInput,
   DeleteMessageBatchRequest,
   DeleteMessageRequest,
   ReceiveMessageRequest,
@@ -34,7 +33,7 @@ import {
   SQSExtendedClientException,
   SQSExtendedClientServiceException,
 } from "./exceptions";
-import { SqsExtendedClientOptions, S3Pointer } from "./types";
+import { SqsExtendedClientOptions } from "./types";
 
 const LEGACY_RESERVED_ATTRIBUTE_NAME = "SQSLargePayloadSize";
 const RESERVED_ATTRIBUTE_NAME = "ExtendedPayloadSize";
