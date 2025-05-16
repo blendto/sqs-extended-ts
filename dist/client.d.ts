@@ -16,7 +16,7 @@ export declare class SQSExtendedClient {
     private retrieveMessageFromS3;
     private embedS3PointerInReceiptHandle;
     private isS3ReceiptHandle;
-    private getOriginalReceiptHandle;
+    getOriginalReceiptHandle(modifiedReceiptHandle: string): string;
     private getFromReceiptHandleByMarker;
     private deleteMessageFromS3;
     sendMessage(params: SendMessageRequest): Promise<SendMessageCommandOutput>;
