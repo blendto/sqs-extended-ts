@@ -1,0 +1,32 @@
+import { SQSClient, SendMessageCommandInput, ReceiveMessageRequest, Message } from "@aws-sdk/client-sqs";
+import { S3Client } from "@aws-sdk/client-s3";
+import { SqsExtendedClientOptions } from "./types";
+export declare class SQSExtendedClient {
+    private sqs;
+    private s3;
+    private options;
+    constructor(sqs: SQSClient, s3: S3Client, options: SqsExtendedClientOptions);
+    private getStringSizeInBytes;
+    private getMessageAttributesSize;
+    private isLarge;
+    private storeMessageInS3;
+    private getS3Key;
+    private checkMessageAttributes;
+    private getReservedAttributeNameIfPresent;
+    private retrieveMessageFromS3;
+    private embedS3PointerInReceiptHandle;
+    private isS3ReceiptHandle;
+    private getOriginalReceiptHandle;
+    private getFromReceiptHandleByMarker;
+    private deleteMessageFromS3;
+    sendMessage(params: SendMessageCommandInput): Promise<any>;
+    receiveMessage(params: ReceiveMessageRequest): Promise<any>;
+    parseMessage(message: Message): Promise<Message>;
+    getMessageAtrributeNamesForReceiveMessage(initial?: ReceiveMessageRequest["MessageAttributeNames"]): string[];
+    deleteMessage(params: any): Promise<any>;
+    sendMessageBatch(params: any): Promise<any>;
+    deleteMessageBatch(params: any): Promise<any>;
+    changeMessageVisibility(params: any): Promise<any>;
+    changeMessageVisibilityBatch(params: any): Promise<any>;
+    purgeQueue(params: any): Promise<any>;
+}
