@@ -267,7 +267,7 @@ export class SQSExtendedClient {
     );
   }
 
-  private getOriginalReceiptHandle(modifiedReceiptHandle: string): string {
+  getOriginalReceiptHandle(modifiedReceiptHandle: string): string {
     return modifiedReceiptHandle.split(S3_KEY_MARKER).pop() || "";
   }
 
