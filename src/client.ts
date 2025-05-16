@@ -9,17 +9,8 @@ import {
   SendMessageBatchCommand,
   DeleteMessageBatchCommand,
   ChangeMessageVisibilityBatchCommand,
-  SendMessageBatchRequest,
-  DeleteMessageBatchRequest,
-  DeleteMessageRequest,
   ReceiveMessageRequest,
-  ReceiveMessageCommandOutput,
-  SendMessageCommandOutput,
-  ChangeMessageVisibilityCommandOutput,
-  ChangeMessageVisibilityBatchCommandOutput,
-  ChangeMessageVisibilityBatchRequest,
-  PurgeQueueCommandOutput,
-  PurgeQueueCommandInput,
+  Message,
 } from "@aws-sdk/client-sqs";
 import {
   S3Client,
@@ -33,7 +24,7 @@ import {
   SQSExtendedClientException,
   SQSExtendedClientServiceException,
 } from "./exceptions";
-import { SqsExtendedClientOptions } from "./types";
+import { SqsExtendedClientOptions, S3Pointer } from "./types";
 
 const LEGACY_RESERVED_ATTRIBUTE_NAME = "SQSLargePayloadSize";
 const RESERVED_ATTRIBUTE_NAME = "ExtendedPayloadSize";
@@ -298,9 +289,7 @@ export class SQSExtendedClient {
     }
   }
 
-  async sendMessage(
-    params: SendMessageCommandInput
-  ): Promise<SendMessageCommandOutput> {
+  async sendMessage(params: SendMessageCommandInput): Promise<any> {
     const { body, attributes } = await this.storeMessageInS3(
       params.MessageBody!,
       params.MessageAttributes || {}
@@ -313,10 +302,38 @@ export class SQSExtendedClient {
     return this.sqs.send(new SendMessageCommand(input));
   }
 
-  async receiveMessage(
-    params: ReceiveMessageRequest
-  ): Promise<ReceiveMessageCommandOutput> {
-    const requestedAttributes = params.MessageAttributeNames || [];
+  async receiveMessage(params: ReceiveMessageRequest): Promise<any> {
+    params.MessageAttributeNames =
+      this.getMessageAtrributeNamesForReceiveMessage(
+        params.MessageAttributeNames
+      );
+    const response = await this.sqs.send(new ReceiveMessageCommand(params));
+    if (response.Messages) {
+      for (const message of response.Messages) {
+        await this.parseMessage(message);
+      }
+    }
+    return response;
+  }
+
+  async parseMessage(message: Message): Promise<Message> {
+    const messageAttributes = message.MessageAttributes || {};
+    if (
+      messageAttributes[RESERVED_ATTRIBUTE_NAME] ||
+      messageAttributes[LEGACY_RESERVED_ATTRIBUTE_NAME]
+    ) {
+      message.ReceiptHandle = this.embedS3PointerInReceiptHandle(message);
+      message.Body = await this.retrieveMessageFromS3(message.Body!);
+      delete messageAttributes[RESERVED_ATTRIBUTE_NAME];
+      delete messageAttributes[LEGACY_RESERVED_ATTRIBUTE_NAME];
+    }
+    return message;
+  }
+
+  getMessageAtrributeNamesForReceiveMessage(
+    initial?: ReceiveMessageRequest["MessageAttributeNames"]
+  ) {
+    const requestedAttributes = initial?.slice() ?? [];
     if (
       !requestedAttributes.includes("All") &&
       !requestedAttributes.includes(".*") &&
@@ -329,27 +346,11 @@ export class SQSExtendedClient {
         requestedAttributes.push(RESERVED_ATTRIBUTE_NAME);
       }
     }
-    params.MessageAttributeNames = requestedAttributes;
-    const response = await this.sqs.send(new ReceiveMessageCommand(params));
-    if (response.Messages) {
-      for (const message of response.Messages) {
-        const messageAttributes = message.MessageAttributes || {};
-        if (
-          messageAttributes[RESERVED_ATTRIBUTE_NAME] ||
-          messageAttributes[LEGACY_RESERVED_ATTRIBUTE_NAME]
-        ) {
-          message.ReceiptHandle = this.embedS3PointerInReceiptHandle(message);
-          message.Body = await this.retrieveMessageFromS3(message.Body!);
-          delete messageAttributes[RESERVED_ATTRIBUTE_NAME];
-          delete messageAttributes[LEGACY_RESERVED_ATTRIBUTE_NAME];
-        }
-      }
-    }
-    return response;
+    return requestedAttributes;
   }
 
-  async deleteMessage(params: DeleteMessageRequest): Promise<any> {
-    let receiptHandle = params.ReceiptHandle!;
+  async deleteMessage(params: any): Promise<any> {
+    let receiptHandle = params.ReceiptHandle;
     if (this.isS3ReceiptHandle(receiptHandle)) {
       await this.deleteMessageFromS3(receiptHandle);
       params.ReceiptHandle = this.getOriginalReceiptHandle(receiptHandle);
@@ -357,11 +358,11 @@ export class SQSExtendedClient {
     return this.sqs.send(new DeleteMessageCommand(params));
   }
 
-  async sendMessageBatch(params: SendMessageBatchRequest): Promise<any> {
+  async sendMessageBatch(params: any): Promise<any> {
     if (this.options.s3BucketName) {
-      for (const entry of params.Entries!) {
+      for (const entry of params.Entries) {
         const { body, attributes } = await this.storeMessageInS3(
-          entry.MessageBody!,
+          entry.MessageBody,
           entry.MessageAttributes || {}
         );
         entry.MessageBody = body;
@@ -371,13 +372,13 @@ export class SQSExtendedClient {
     return this.sqs.send(new SendMessageBatchCommand(params));
   }
 
-  async deleteMessageBatch(params: DeleteMessageBatchRequest): Promise<any> {
+  async deleteMessageBatch(params: any): Promise<any> {
     if (this.options.s3BucketName) {
-      for (const entry of params.Entries!) {
-        if (this.isS3ReceiptHandle(entry.ReceiptHandle!)) {
-          await this.deleteMessageFromS3(entry.ReceiptHandle!);
+      for (const entry of params.Entries) {
+        if (this.isS3ReceiptHandle(entry.ReceiptHandle)) {
+          await this.deleteMessageFromS3(entry.ReceiptHandle);
           entry.ReceiptHandle = this.getOriginalReceiptHandle(
-            entry.ReceiptHandle!
+            entry.ReceiptHandle
           );
         }
       }
@@ -385,9 +386,7 @@ export class SQSExtendedClient {
     return this.sqs.send(new DeleteMessageBatchCommand(params));
   }
 
-  async changeMessageVisibility(
-    params: any
-  ): Promise<ChangeMessageVisibilityCommandOutput> {
+  async changeMessageVisibility(params: any): Promise<any> {
     if (this.isS3ReceiptHandle(params.ReceiptHandle)) {
       params.ReceiptHandle = this.getOriginalReceiptHandle(
         params.ReceiptHandle
@@ -396,22 +395,18 @@ export class SQSExtendedClient {
     return this.sqs.send(new ChangeMessageVisibilityCommand(params));
   }
 
-  async changeMessageVisibilityBatch(
-    params: ChangeMessageVisibilityBatchRequest
-  ): Promise<ChangeMessageVisibilityBatchCommandOutput> {
-    for (const entry of params.Entries!) {
-      if (this.isS3ReceiptHandle(entry.ReceiptHandle!)) {
+  async changeMessageVisibilityBatch(params: any): Promise<any> {
+    for (const entry of params.Entries) {
+      if (this.isS3ReceiptHandle(entry.ReceiptHandle)) {
         entry.ReceiptHandle = this.getOriginalReceiptHandle(
-          entry.ReceiptHandle!
+          entry.ReceiptHandle
         );
       }
     }
     return this.sqs.send(new ChangeMessageVisibilityBatchCommand(params));
   }
 
-  async purgeQueue(
-    params: PurgeQueueCommandInput
-  ): Promise<PurgeQueueCommandOutput> {
+  async purgeQueue(params: any): Promise<any> {
     console.warn(
       "Calling purgeQueue deletes SQS messages without deleting their payload from S3."
     );
