@@ -23,6 +23,7 @@
     "@aws-sdk/client-s3": "^3.0.0",
     "@aws-sdk/client-sqs": "^3.0.0"
   },
+  "type": "module",
   "devDependencies": {
     "@eslint/js": "^9.26.0",
     "@types/jest": "^29.0.0",
