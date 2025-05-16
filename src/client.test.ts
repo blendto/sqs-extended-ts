@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/ban-ts-comment */
 import { SQSExtendedClient } from "./client";
 import { SQSClient, SendMessageCommandInput } from "@aws-sdk/client-sqs";
 import { S3Client } from "@aws-sdk/client-s3";
@@ -26,7 +27,7 @@ describe("SQSExtendedClient", () => {
   it("should offload large messages to S3", async () => {
     const spy = jest
       .spyOn(s3, "send")
-      // @ts-ignore
+      // @ts-expect-error
       .mockResolvedValue({ $metadata: { httpStatusCode: 204 } } as any);
     const params: SendMessageCommandInput = {
       QueueUrl: "queue-url",

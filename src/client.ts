@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import {
   SQSClient,
   SendMessageCommand,
@@ -24,7 +25,7 @@ import {
   SQSExtendedClientException,
   SQSExtendedClientServiceException,
 } from "./exceptions";
-import { SqsExtendedClientOptions, S3Pointer } from "./types";
+import { SqsExtendedClientOptions } from "./types";
 
 const LEGACY_RESERVED_ATTRIBUTE_NAME = "SQSLargePayloadSize";
 const RESERVED_ATTRIBUTE_NAME = "ExtendedPayloadSize";
@@ -181,7 +182,7 @@ export class SQSExtendedClient {
   }
 
   private getReservedAttributeNameIfPresent(
-    messageAttributes: Record<string, any>
+    messageAttributes: Record<string, unknown>
   ): string {
     if (RESERVED_ATTRIBUTE_NAME in messageAttributes)
       return RESERVED_ATTRIBUTE_NAME;
@@ -350,7 +351,7 @@ export class SQSExtendedClient {
   }
 
   async deleteMessage(params: any): Promise<any> {
-    let receiptHandle = params.ReceiptHandle;
+    const receiptHandle = params.ReceiptHandle;
     if (this.isS3ReceiptHandle(receiptHandle)) {
       await this.deleteMessageFromS3(receiptHandle);
       params.ReceiptHandle = this.getOriginalReceiptHandle(receiptHandle);

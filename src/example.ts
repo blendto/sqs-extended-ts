@@ -18,8 +18,8 @@ async function exampleSendReceive() {
     QueueUrl: "https://sqs.us-east-1.amazonaws.com/123456789012/your-queue",
     MessageBody: "Hello, this is a test message that might be large!",
     MessageAttributes: {
-      CustomAttr: { DataType: "String", StringValue: "value" }
-    }
+      CustomAttr: { DataType: "String", StringValue: "value" },
+    },
   });
   console.log("Send result:", sendResult);
 
@@ -27,7 +27,7 @@ async function exampleSendReceive() {
   const receiveResult = await extendedClient.receiveMessage({
     QueueUrl: "https://sqs.us-east-1.amazonaws.com/123456789012/your-queue",
     MaxNumberOfMessages: 1,
-    MessageAttributeNames: ["All"]
+    MessageAttributeNames: ["All"],
   });
   console.log("Receive result:", receiveResult);
 }
