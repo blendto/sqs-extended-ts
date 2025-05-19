@@ -1,6 +1,6 @@
 {
   "name": "sqs-extended-ts",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "Amazon SQS Extended Client Library for TypeScript",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

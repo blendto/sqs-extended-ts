@@ -330,14 +330,19 @@ export class SQSExtendedClient {
     const response = await this.sqs.send(new ReceiveMessageCommand(params));
     if (response.Messages) {
       for (const message of response.Messages) {
-        await this.parseMessage(message);
+        await this.parseMessage(message, { inPlace: true });
       }
     }
     return response;
   }
 
-  async parseMessage(message: Message): Promise<Message> {
+  async parseMessage(message: Message, { inPlace = false }): Promise<Message> {
     const messageAttributes = message.MessageAttributes || {};
+
+    if (!inPlace) {
+      message = { ...message };
+    }
+
     if (
       messageAttributes[RESERVED_ATTRIBUTE_NAME] ||
       messageAttributes[LEGACY_RESERVED_ATTRIBUTE_NAME]
