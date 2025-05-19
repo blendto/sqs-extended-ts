@@ -236,7 +236,7 @@ export class SQSExtendedClient {
     return Buffer.concat(chunks).toString("utf-8");
   }
 
-  private embedS3PointerInReceiptHandle(message: any): string {
+  getS3PointerInReceiptHandle(message: any): string {
     const receiptHandle = message.ReceiptHandle;
     let messageBody;
     try {
@@ -342,7 +342,7 @@ export class SQSExtendedClient {
       messageAttributes[RESERVED_ATTRIBUTE_NAME] ||
       messageAttributes[LEGACY_RESERVED_ATTRIBUTE_NAME]
     ) {
-      message.ReceiptHandle = this.embedS3PointerInReceiptHandle(message);
+      message.ReceiptHandle = this.getS3PointerInReceiptHandle(message);
       message.Body = await this.retrieveMessageFromS3(message.Body!);
       delete messageAttributes[RESERVED_ATTRIBUTE_NAME];
       delete messageAttributes[LEGACY_RESERVED_ATTRIBUTE_NAME];
