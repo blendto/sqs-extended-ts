@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
-import { SQSExtendedClient } from "./client";
+import { SQSExtendedBridge } from "./bridge";
 import { SQSClient, SendMessageCommandInput } from "@aws-sdk/client-sqs";
 import { S3Client } from "@aws-sdk/client-s3";
 
@@ -7,7 +7,7 @@ describe("SQSExtendedClient", () => {
   const sqs = new SQSClient({ region: "us-east-1" });
   const s3 = new S3Client({ region: "us-east-1" });
   const bucket = "test-bucket";
-  const client = new SQSExtendedClient(sqs, s3, {
+  const client = new SQSExtendedBridge(sqs, s3, {
     s3BucketName: bucket,
     messageSizeThreshold: 10,
   });

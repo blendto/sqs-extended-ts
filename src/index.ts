@@ -1,5 +1,5 @@
-import { SQSExtendedClient } from "./client";
-export default SQSExtendedClient;
+import { SQSExtendedBridge } from "./bridge";
+export default SQSExtendedBridge;
 
 export { SQSExtendedClientException } from "./exceptions";
 export { S3Pointer, SqsExtendedClientOptions } from "./types";
