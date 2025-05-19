@@ -7,13 +7,9 @@ import {
   ReceiveMessageCommand,
   SendMessageBatchCommand,
   SendMessageCommand,
-  ServiceInputTypes,
-  ServiceOutputTypes,
   SQSClient,
-  SQSClientResolvedConfig,
 } from "@aws-sdk/client-sqs";
 import { SQSExtendedBridge } from "./bridge";
-import { MiddlewareStack } from "@aws-sdk/types";
 
 class SQSExtendedClient extends SQSExtendedBridge implements SQSClient {
   send: SQSClient["send"] = (command) => {
@@ -38,7 +34,7 @@ class SQSExtendedClient extends SQSExtendedBridge implements SQSClient {
     return this.sqs.send(command);
   };
 
-  public get config(): SQSClientResolvedConfig {
+  public get config() {
     return this.sqs.config;
   }
 
@@ -46,14 +42,11 @@ class SQSExtendedClient extends SQSExtendedBridge implements SQSClient {
     throw new Error("Destroy sqs and s3 objects individually");
   }
 
-  public get middlewareStack(): MiddlewareStack<
-    ServiceInputTypes,
-    ServiceOutputTypes
-  > {
+  public get middlewareStack() {
     return this.sqs.middlewareStack;
   }
 
-  public get initConfig(): object | undefined {
+  public get initConfig() {
     return this.sqs.initConfig;
   }
 }
