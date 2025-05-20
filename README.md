@@ -6,6 +6,7 @@ Amazon SQS Extended Client Library for TypeScript. This library allows you to se
 
 - Transparently offloads large SQS messages to S3
 - Compatible with AWS SDK v3 for JavaScript/TypeScript
+- Can be used as a drop-in replacement for `SQSClient` to use with packages like `sqs-consumer`
 
 ## Usage
 
