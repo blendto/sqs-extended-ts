@@ -1,4 +1,4 @@
-# sqs-extended-ts
+# sqs-extended-ts  [![npm version](https://img.shields.io/badge/npm-CB3837?style=for-the-badge&logo=npm&logoColor=white)](https://www.npmjs.com/package/sqs-extended-ts)
 
 Amazon SQS Extended Client Library for TypeScript. This library allows you to send and receive large messages via SQS by storing payloads in S3 when they exceed a threshold.
 
